@@ -16,4 +16,4 @@ When ready, the script can be run with the following options:
 /hash - hashes the tool ZIPs and compares the hashes on Github; only tests against script-downloaded ZIP files
 
 ### Prerequisites
-Windows 10; may work with other versions running PowerShell 6+
+Windows 10; may work with other versions running PowerShell 5.1+
