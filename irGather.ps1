@@ -35,7 +35,7 @@ add-type @"
 # Local globals
 $adminName = "Unassigned";
 $base = (Get-Location).toString() + "\irtools";
-$files = "sysinternalsTools.zip", "nirsoftTools.zip";
+$files = "irGather.ps1", "sysinternalsTools.zip", "nirsoftTools.zip";
 $filesAlt = "sysInternalsToolsA.zip", "sysInternalsToolsB.zip", "nirsoftTools.zip";
 $baseUrl = "https://nobutwhy.com/files/";
 $baseUrlAlt = "https://github.com/jawcode/irtools/raw/main/";
@@ -48,17 +48,17 @@ $outPrefix = $base + "\" + $datePrefix + "_" + $(HOSTNAME);
 class Utils {
 	[string]checkHashes([string[]]$files, [string]$base) {		
 		$valid = "UNKNOWN";
+		$scriptActual = $(wget https://raw.githubusercontent.com/jawcode/irtools/main/scriptHash.txt).Content;
 		$sysActual = $(wget https://raw.githubusercontent.com/jawcode/irtools/main/sysinternalsHash.txt).Content;
 		$nirActual = $(wget https://raw.githubusercontent.com/jawcode/irtools/main/nirHash.txt).Content;
 		
-		$hashes = $sysActual, $nirActual;
-		Write-Host $hashes[0];
-		Write-Host $files[0];
+		$hashes = $scriptActual, $sysActual, $nirActual;
 		
 		$validCount = 0;
 		for($i = 0; $i -lt $files.length; $i++) {
 			$fileName = $files[$i];
 			$curFile = $base + "\" + $files[$i];
+			if($files[$i].indexOf("irGather") -gt -1) { $curFile = (Get-Location).toString() + "\" + $files[$i]; }
 			$curHash = $(Get-FileHash $curFile).Hash.toString().Trim();
 			$validHash = $hashes[$i].toString().Trim();
 			
@@ -172,16 +172,19 @@ Function Download-Files() {
 				$curFile = $files[$i];
 				$fileString = $baseUrl + $curFile;
 				$outString = $base + "\" + $curFile;
+				if($files[$i].indexOf("irGather") -gt -1) { $outString = $(Get-Location).toString() + "\" + $curFile; }
 				Write-Host "Downloading $fileString to $outString" -ForegroundColor White;
 				Get-File($fileString + ";" + $outString);
 
-				if (Test-Path -Path $outString) {
-					$extractLoc = $folders[$fIndex["sysinternals"]];
-					if($files[$i].indexOf("nirsoft") -gt -1) { $extractLoc = $folders[$fIndex["nirsoft"]]; }
+				if(Test-Path -Path $outString) {
+					if($files[$i].indexOf("irGather") -lt 0) {
+						$extractLoc = $folders[$fIndex["sysinternals"]];
+						if($files[$i].indexOf("nirsoft") -gt -1) { $extractLoc = $folders[$fIndex["nirsoft"]]; }
 
-					Unblock-File -Path $outString
-					Write-Host "Extracting $curFile to $extractLoc" -ForegroundColor White;
-					Expand-Archive -Path $outString -DestinationPath $extractLoc -Force
+						Unblock-File -Path $outString
+						Write-Host "Extracting $curFile to $extractLoc" -ForegroundColor White;
+						Expand-Archive -Path $outString -DestinationPath $extractLoc -Force
+					}
 				}
 				else { Throw "The file $curFile failed to download. Exiting."; }
 		}
