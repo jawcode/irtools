@@ -2,13 +2,11 @@
 .SYNOPSIS 
     Function Run-Complete - downloads Sysinternals/NirSoft, uses tools to gather IR information, outputs txt file summary and zipped results
 	Options: 
-		/local - does not download tools, assumes they are already local, otherwise runs as the above
-		/hash - hashes the Sysinternals ZIP and compares it with the online version, prompting for confirmation before starting
-		/select - runs specific programs using comma-separated values (e.g. whois,tcpview,zoomit); non-case-sensitive
+		/update - download tools to update them and then continues running the gathering script
+		/download - only downloads the tools; allows for update without gathering details
+		/hash - hashes the tool ZIPs and compares them with the online versions
 .NOTES 
     Author: J.A. Waters | jawaters@jawaters.com | @jawdev | https://github.com/jawcode
-.HASH_SHA256
-    1772D1BFF26EC8C262713FDEA7D32CC59350EA4B9DF3C44CCE9E4FE4406CE728
 #>
 # Load namespaces
 using assembly System.Net.Http;
@@ -39,8 +37,7 @@ $adminName = "Unassigned";
 $base = (Get-Location).toString() + "\irtools";
 $files = "sysinternalsTools.zip", "nirsoftTools.zip";
 $filesAlt = "sysInternalsToolsA.zip", "sysInternalsToolsB.zip", "nirsoftTools.zip";
-$baseUrl = "http://127.0.0.1/store/";
-$baseUrlL = "https://nobutwhy.com/files/";
+$baseUrl = "https://nobutwhy.com/files/";
 $baseUrlAlt = "https://github.com/jawcode/irtools/raw/main/";
 $folders = "$base", "$base\sysinternals", "$base\nirsoft";
 $fIndex = @{'sysinternals' = 1; 'nirsoft' = 2;};
@@ -209,7 +206,7 @@ Function Build-Data() {
 	Write-Host -NoNewLine "Network ports..." -ForegroundColor White;
 	echo $utilRes.portsDetail() > ($outPrefix + "_portReport.txt");
 	Write-Host -NoNewLine "MsInfo32..." -ForegroundColor White;
-	# Start-Process -Wait "msinfo32.exe" -ArgumentList $("/report " + $outPrefix + "_msinfo32Report.txt");
+	Start-Process -Wait "msinfo32.exe" -ArgumentList $("/report " + $outPrefix + "_msinfo32Report.txt");
 	
 	# SysInternals default-run tools; accept EULA for each before pulling data
 	$sysRun = $folders[$fIndex["sysinternals"]] + "\";
@@ -257,9 +254,7 @@ Function Build-Data() {
 Function Run-Complete {
 	$adminName = Read-Host -Prompt 'Input the identity of the user running this script';
 		
-	if($args.indexOf('NONE') -lt 0) {
-		Download-Files;
-	}
+	if($args.indexOf('nonlocal') -gt -1) { Download-Files; }
 	else {
 		Write-Host "Starting process using local tools..." -ForegroundColor White;
 	}
@@ -275,7 +270,6 @@ if($args.length -gt 0) {
 		"/update" { $argsProcess.Add("nonlocal") > $null; }
 		"/download" { $argsProcess.Add("download") > $null; }
 		"/hash" { $argsProcess.Add("hash") > $null; }
-		"/select" { $argsProcess.Add("select") > $null; }
 		"/help" { $argsProcess.Add("help") > $null; }
 	}
 	$argsProcessed = $argsProcess -Join ";";
@@ -303,5 +297,4 @@ else {
 	Write-Host "`t/update - newly downloads tools, then runs the IR checks";
 	Write-Host "`t/download - only downloads the tools, does not run IR checks";
 	Write-Host "`t/hash - hashes the tool ZIPs and compares them to a hash on Github; prompts for confirmation before starting";
-	Write-Host "`t/select - runs specific programs using comma-separated values (e.g. whois,tcpview,zoomit); non-case-sensitive`n";
 }
