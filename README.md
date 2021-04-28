@@ -1,4 +1,4 @@
-# Automated Incident Response information gathering scripts
+# Automated Information Gathering Scripts for Incident Response
 This project contains scripts, "irGather.ps1" and "irGather.sh", that gather useful computer information for the purposes of troubleshooting and incident response. The scripts will attempt to run with local-only files, but the PowerShell version does default to the use of several SystemInternals and NirSoft tools. These tools can be downloaded with the script, or they can be pulled by cloning this repo. The Linux script will ask to install packages as needed to complete its process.
 
 ## Getting Started
