@@ -22,11 +22,11 @@ Windows 10; may work with other versions running PowerShell 5.1+
 ## Getting Started
 Linux Script
 Clone this repo or download the "irGather.sh" file. On first-run, the script will check for the directory structure:
-./irtools
+./reports
 
 If not found, the folder will be created. If tools to run from the script aren't found, the script will ask if you'd like to use a package manager to install those tools. Answering no will stop the script from running further.
 
-The Linux script can run without arguments, or the -hash argument will hash the compressed files within the ./irtools folder.
+The Linux script can run without arguments, or the -hash argument will show a hash of compressed files within the ./reports folder.
 
 ### Prerequisites
 ifconfig, route, resolvectl, netstat
