@@ -1,11 +1,17 @@
 #!/bin/bash
+doFunc="UNSET";
+while getopts h flag; do
+    case "${flag}" in
+        h) doFunc="SET";;
+    esac
+done;
 
 adminName="Unassigned";
 base=".";
 baseOut="${base}/reports";
 files=("irGather.sh" "exTools.tar.gz");
 baseUrl="https://nobutwhy.com/files";
-folders=($base $baseOut "$base/exTools");
+folders=($base $baseOut);
 startTime=$(date '+%A %m/%d/%Y %H:%M:%S %z');
 datePrefix=$(date '+%Y%d%m-%M');
 outPrefix="${baseOut}/${datePrefix}_$(hostname)";
@@ -13,6 +19,46 @@ outPrefix="${baseOut}/${datePrefix}_$(hostname)";
 for cDir in ${folders[@]}; do
         [ ! -d $cDir ] && echo "Creating directory '$cDir'"; mkdir -p $cDir;
 done
+
+if [[ $doFunc == "SET" ]];
+then
+        search="${baseOut}/*.tar.gz";
+        for file in $search; do
+                nHash=$(sha256sum $file);
+                echo "${nHash}";
+        done
+        exit;
+fi
+
+echo "Enter the admin name running this script: ";
+read adminName;
+
+# Check for tools
+hasNetstat=true;
+hasIfconfig=true;
+
+if ! command -v netstat &> /dev/null; then hasNetstat=false; fi;
+if ! command -v ifconfig &> /dev/null; then hasIfconfig=false; fi;
+
+if [[ $hasNetstat == false ]] || [[ $hasIfconfig == false ]];
+then
+        toolChoice=false;
+        echo "Some tools were not found. Download them now? [y/n]";
+        read toolChoice;
+
+        if [[ $toolChoice == "y" ]] || [[ $toolChoice == "Y" ]];
+        then
+                apt update
+                if [[ $hasNetstat == false ]] || [[ $hasIfconfig == false ]];
+                then
+                        if command -v apt &> /dev/null; then apt -y install net-tools; fi;
+                        if command -v dnf &> /dev/null; then dnf -y install net-tools; fi;
+                        if command -v zypper &> /dev/null; then zypper -n install net-tools; fi;
+                        if command -v pacman &> /dev/null; then pacman -S --noconfirm netstat-nat; fi;
+                fi;
+        else exit; fi;
+fi;
+
 
 echo "Writing result files..."
 # Create specific files for detailed output
