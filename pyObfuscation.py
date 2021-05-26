@@ -4,15 +4,34 @@
 # This program is provided under the MIT License
 
 # Imports
-import base64, binascii, os, subprocess, sys
+import base64, binascii, os, pkg_resources, subprocess, sys
 from argparse import ArgumentParser
 from cryptography.fernet import Fernet
+
+# Set an object with the required packages
+required = {'python-magic'}
+
+if not os.name == "posix":
+	required = {'python-magic', 'python-magic-bin'}
+
+# Get the currently installed packages
+installed = {pkg.key for pkg in pkg_resources.working_set}
+# Set the date for missing packages
+missing = required - installed
+
+# If there are any items missing, install those modules with pip
+if missing:
+	# Use the system python executable to run pip rather than using the pip module directly imported
+	python = sys.executable
+	subprocess.check_call([python, '-m', 'pip', 'install', *missing], stdout=subprocess.DEVNULL)
+
+import magic
 
 # Globals
 # Default crypto key; shouldn't be used or reused for production data
 useKey = b'a-1oGqvIJzA5ZPriEvuJrI1rpkN71dfJe4oSQ9ay4Dk='
 
-# If needed on a Windows OS, the following file release was compiled and works with Windows 10
+# If needed on a Windows OS, the following release was compiled for Windows
 # https://github.com/nscaife/file-windows/releases/download/20170108/file-windows-20170108.zip
 
 # Entry point
@@ -82,7 +101,8 @@ if __name__ == '__main__':
 
 	# Parse additional operation choices provided by the user
 	if opts.choice == "detect":
-		res = subprocess.check_output(["file", opts.infile], universal_newlines = True)
+		#res = subprocess.check_output(["file", opts.infile], universal_newlines = True)
+		res = magic.from_file(opts.infile)
 		# Output the file type as shown by the file command
 		print(res)
 		
