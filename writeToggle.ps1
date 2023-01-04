@@ -3,7 +3,7 @@
 .SYNOPSIS 
     Toggles the registry setting "Deny_Write" for all removable storage; running will notify the current status after changing the setting
 	.NOTES 
-    Author: J.A. Waters | jawaters@jawaters.com | @jawdev | https://github.com/jawcode
+    Author: J.A. Waters | jawaters@nobutwhy.com | https://github.com/jawcode
 #>
 
 # Local globals
