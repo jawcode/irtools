@@ -6,7 +6,7 @@
 		/download - only downloads the tools; allows for update without gathering details
 		/hash - hashes the tool ZIPs and compares them with the online versions
 .NOTES 
-    Author: J.A. Waters | jawaters@jawaters.com | @jawdev | https://github.com/jawcode
+    Author: J.A. Waters | jawaters@nobutwhy.com | https://github.com/jawcode
 #>
 # Load namespaces
 using assembly System.Net.Http;
